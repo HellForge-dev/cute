@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>For My Favourite Person ❤️</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Dancing+Script:wght@700&family=Poppins:wght@300;400;500;600;700&family=Sacramento&display=swap" rel="stylesheet">
+  <!-- Canvas Confetti for Celebration -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      overflow-x: hidden;
+      background: linear-gradient(135deg, #fff0f3 0%, #ffe3e8 40%, #ffd6e0 70%, #ffc2d1 100%);
+      min-height: 100vh;
+    }
+
+    .handwriting {
+      font-family: 'Caveat', cursive;
+    }
+
+    .romantic-script {
+      font-family: 'Sacramento', cursive;
+    }
+
+    /* Floating Heart Background Animation */
+    .heart-bg {
+      position: fixed;
+      pointer-events: none;
+      z-index: 0;
+      animation: floatUp 8s linear infinite;
+      opacity: 0.6;
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(110vh) scale(0.6) rotate(0deg);
+        opacity: 0.8;
+      }
+      100% {
+        transform: translateY(-20vh) scale(1.2) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* Soft pulse for badges & cute items */
+    @keyframes gentlePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+    .pulse-cute {
+      animation: gentlePulse 2.4s ease-in-out infinite;
+    }
+
+    /* Polaroid tilted effect */
+    .polaroid-card {
+      box-shadow: 0 15px 35px -5px rgba(255, 107, 129, 0.25), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      transform: rotate(-2deg);
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+    .polaroid-card:hover {
+      transform: rotate(0deg) scale(1.02);
+      box-shadow: 0 20px 40px -5px rgba(255, 71, 87, 0.35);
+    }
+
+    /* Custom Glassmorphism Box */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1.5px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 0 20px 50px rgba(244, 63, 94, 0.15);
+    }
+
+    /* Envelope styling */
+    .envelope-shadow {
+      filter: drop-shadow(0px 18px 24px rgba(244, 63, 94, 0.2));
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #f472b6;
+      border-radius: 999px;
+    }
+  </style>
+</head>
+<body class="relative flex flex-col items-center justify-center p-3 sm:p-6 text-gray-800 select-none">
+
+  <div id="heartCanvasContainer" class="fixed inset-0 overflow-hidden pointer-events-none z-0"></div>
+
+  <!-- Music Sound Toggle Floating Bar -->
+  <div class="fixed top-4 right-4 z-50 flex items-center gap-2">
+    <button id="musicToggleBtn" class="flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-medium bg-white/90 backdrop-blur-md text-rose-600 rounded-full shadow-md hover:bg-rose-50 transition border border-rose-200">
+      <span id="musicIcon" class="text-base">🎵</span>
+      <span id="musicStatusText">Play Soft Melody</span>
+    </button>
+  </div>
+
+  <!-- STAGE 1: Welcome & Input Form Modal -->
+  <section id="stage1" class="relative z-10 w-full max-w-lg transition-all duration-700">
+    <div class="glass-card rounded-3xl p-6 sm:p-9 text-center border-rose-100">
+      
+      <!-- Cute Bear / Heart Mascot Icon -->
+      <div class="inline-block relative mb-3">
+        <div class="w-20 h-20 sm:w-24 sm:h-24 mx-auto bg-gradient-to-tr from-pink-300 via-rose-300 to-red-200 rounded-full flex items-center justify-center shadow-lg pulse-cute text-4xl sm:text-5xl border-4 border-white">
+          🧸
+        </div>
+        <span class="absolute -bottom-1 -right-1 bg-white text-rose-500 rounded-full p-1.5 shadow-md text-sm">💖</span>
+      </div>
+
+      <h1 class="handwriting text-3xl sm:text-4xl font-bold text-rose-600 tracking-wide mt-1 mb-1">
+        A Special Message Just For You
+      </h1>
+      <p class="text-xs sm:text-sm text-gray-600 mb-6 font-light">
+        Someone holds you dear in their heart every single breath. Please reveal yourself to unlock this secret letter ✨
+      </p>
+
+      <!-- Input Form -->
+      <form id="onboardingForm" class="space-y-4 text-left" onsubmit="event.preventDefault(); validateAndProceed();">
+        <!-- Name Field -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-rose-700 mb-1 ml-1">
+            Your Beautiful Name <span class="text-red-500">*</span>
+          </label>
+          <div class="relative">
+            <input 
+              type="text" 
+              id="gfNameInput" 
+              placeholder="e.g. My Princess / Jaanu" 
+              required
+              class="w-full px-4 py-3 rounded-2xl bg-white/80 border border-rose-200 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-rose-400 text-sm sm:text-base text-gray-800 placeholder-rose-300 transition shadow-inner"
+            />
+            <span class="absolute right-4 top-3.5 text-rose-400 text-lg">🌸</span>
+          </div>
+        </div>
+
+        <!-- Mandatory Photo Upload Field -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-rose-700 mb-1 ml-1">
+            Upload Your Cute Photo <span class="text-red-500">* (Mandatory)</span>
+          </label>
+          <label 
+            for="photoInput" 
+            class="group cursor-pointer flex flex-col items-center justify-center border-2 border-dashed border-rose-300 hover:border-rose-500 rounded-2xl p-4 bg-white/60 hover:bg-rose-50/70 transition-all text-center relative overflow-hidden"
+          >
+            <!-- Preview Container -->
+            <div id="uploadPreviewArea" class="flex flex-col items-center">
+              <div class="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center text-rose-500 mb-2 group-hover:scale-110 transition">
+                📷
+              </div>
+              <p class="text-xs sm:text-sm font-medium text-rose-600">Click to choose a sweet picture of you</p>
+              <p class="text-[11px] text-gray-500 mt-0.5">JPG, PNG or WEBP (Saved locally only)</p>
+            </div>
+
+            <!-- Uploaded Image Active Preview -->
+            <div id="previewContainer" class="hidden flex-col items-center">
+              <img id="imagePreview" src="" alt="Preview" class="w-24 h-24 object-cover rounded-xl shadow-md border-2 border-white mb-2" />
+              <span class="text-xs font-semibold text-emerald-600 flex items-center gap-1">
+                ✓ Photo Selected Beautifully! (Tap to change)
+              </span>
+            </div>
+
+            <input type="file" id="photoInput" accept="image/*" class="hidden" required onchange="handlePhotoUpload(event)" />
+          </label>
+        </div>
+
+        <!-- Feedback alert message container -->
+        <div id="formErrorMsg" class="hidden text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-xl p-2.5 text-center font-medium"></div>
+
+        <!-- Unlock Button -->
+        <button 
+          type="submit" 
+          id="unlockBtn"
+          class="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-rose-500 via-pink-500 to-red-400 text-white font-semibold text-sm sm:text-base shadow-lg shadow-rose-300/60 hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group mt-2"
+        >
+          <span>Open My Whole Heart</span>
+          <span class="group-hover:translate-x-1 transition">💌</span>
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- STAGE 2: Envelope & Heartfelt Letter Screen -->
+  <section id="stage2" class="hidden relative z-10 w-full max-w-2xl my-6 transition-all duration-700">
+    <div class="glass-card rounded-3xl p-5 sm:p-10 border-rose-200 shadow-2xl relative overflow-hidden">
+      
+      <!-- Top Floating Sparkle Badges -->
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-6 border-b border-rose-100 pb-4">
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-rose-100 text-rose-600 text-sm">💌</span>
+          <span class="text-xs uppercase tracking-widest font-bold text-rose-500">Apology & Love Letter</span>
+        </div>
+        <div class="text-xs font-medium bg-rose-50 text-rose-600 px-3 py-1 rounded-full border border-rose-200 flex items-center gap-1">
+          <span>💖 For:</span>
+          <span id="displayHerNameHeader" class="font-bold underline">My Love</span>
+        </div>
+      </div>
+
+      <!-- Polaroid Section with Uploaded Photo -->
+      <div class="flex flex-col sm:flex-row items-center gap-6 mb-8 bg-gradient-to-r from-rose-50/70 via-white to-pink-50/60 p-4 sm:p-6 rounded-2xl border border-rose-100">
+        <!-- Polaroid Frame -->
+        <div class="polaroid-card bg-white p-3 rounded-xl shadow-md w-44 sm:w-48 shrink-0 flex flex-col items-center border border-gray-100">
+          <div class="w-36 h-40 sm:w-40 sm:h-44 rounded-lg overflow-hidden bg-rose-50 relative">
+            <img id="polaroidPhoto" src="" alt="Her photo" class="w-full h-full object-cover">
+            <div class="absolute bottom-1 right-1 text-xs bg-white/70 backdrop-blur-sm px-1.5 py-0.5 rounded text-rose-500">✨</div>
+          </div>
+          <p id="polaroidCaption" class="handwriting text-lg sm:text-xl font-bold text-gray-700 mt-2 text-center truncate max-w-[150px]">
+            My Sweetheart
+          </p>
+        </div>
+
+        <!-- Live Ticking "Missing You" Emotional Counter -->
+        <div class="flex-1 text-center sm:text-left">
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-100/70 text-rose-600 text-xs font-medium mb-2">
+            <span class="animate-ping inline-block w-1.5 h-1.5 rounded-full bg-rose-500 mr-0.5"></span>
+            Har lamha, har saans bas tumhare naam
+          </div>
+          <h2 class="text-base sm:text-lg font-bold text-gray-800 leading-snug">
+            Missing you & longing for your smile every single tick:
+          </h2>
+          <p class="text-xs text-gray-500 mb-3">
+            Since the moment distance or misunderstanding came between us...
+          </p>
+
+          <!-- Ticker Boxes -->
+          <div class="grid grid-cols-5 gap-1.5 sm:gap-2 text-center font-mono">
+            <div class="bg-white/90 p-2 rounded-xl shadow-sm border border-rose-100">
+              <span id="tickerDays" class="block text-base sm:text-lg font-extrabold text-rose-600">00</span>
+              <span class="text-[9px] uppercase tracking-wider text-gray-400 font-sans">Days</span>
+            </div>
+            <div class="bg-white/90 p-2 rounded-xl shadow-sm border border-rose-100">
+              <span id="tickerHours" class="block text-base sm:text-lg font-extrabold text-rose-600">00</span>
+              <span class="text-[9px] uppercase tracking-wider text-gray-400 font-sans">Hours</span>
+            </div>
+            <div class="bg-white/90 p-2 rounded-xl shadow-sm border border-rose-100">
+              <span id="tickerMins" class="block text-base sm:text-lg font-extrabold text-rose-600">00</span>
+              <span class="text-[9px] uppercase tracking-wider text-gray-400 font-sans">Mins</span>
+            </div>
+            <div class="bg-white/90 p-2 rounded-xl shadow-sm border border-rose-100">
+              <span id="tickerSecs" class="block text-base sm:text-lg font-extrabold text-rose-600">00</span>
+              <span class="text-[9px] uppercase tracking-wider text-gray-400 font-sans">Secs</span>
+            </div>
+            <div class="bg-rose-500 p-2 rounded-xl shadow-sm text-white border border-rose-400">
+              <span id="tickerMillis" class="block text-base sm:text-lg font-extrabold text-white">000</span>
+              <span class="text-[9px] uppercase tracking-wider text-rose-200 font-sans">Ms</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="relative bg-white/90 rounded-2xl p-5 sm:p-8 border border-rose-100 shadow-inner mb-6">
+        <span class="absolute top-3 right-4 text-3xl opacity-20">✍️</span>
+        <h3 class="romantic-script text-3xl sm:text-4xl text-rose-600 mb-2">Dearest <span id="letterNamePlaceholder">Love</span>,</h3>
+        
+        <div id="typewriterText" class="handwriting text-xl sm:text-2xl text-gray-800 leading-relaxed space-y-3 font-semibold">
+          <p>
+            I am truly, deeply sorry from the bottom of my heart. Meri kisi bhi baat ya galti se agar tumhari aankhon mein thoda sa bhi dukh aaya ho, to mujhe maaf kar do na please.
+          </p>
+          <p>
+            Sach bolu toh, har millisecond, har second, har ghante bas tumhari hi kami mehsoos hoti hai... Tum paas nahi hoti ho toh har ek pal adhoora sa lagta hai. My day never feels right without your cute laugh, your voice, and that bright smile of yours.
+          </p>
+          <p>
+            You mean the absolute world to me. I promise to listen better, understand you more, and never take your gentle heart for granted. Mere paas na hone ka jo dard hai, woh main har pal mehsus kar raha hoon. Please don't stay upset with me for long... ❤️
+          </p>
+        </div>
+        
+        <div class="mt-5 pt-3 border-t border-rose-100 flex items-center justify-between text-xs sm:text-sm text-gray-500">
+          <span>Forever yours, with all my love</span>
+          <span class="handwriting text-xl text-rose-500 font-bold">Always & Forever 🌹</span>
+        </div>
+      </div>
+
+      <div class="text-center relative pt-2">
+        <p class="text-xs sm:text-sm font-semibold uppercase tracking-wider text-gray-500 mb-4">
+          Will you forgive me and bring that sweet smile back? 🥺
+        </p>
+
+        <div class="relative flex flex-wrap items-center justify-center gap-4 min-h-[70px]" id="buttonActionArena">
+          <!-- YES BUTTON -->
+          <button 
+            id="forgiveBtn" 
+            onclick="handleForgive()"
+            class="px-8 py-3.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-base shadow-lg shadow-emerald-200 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 z-20 cursor-pointer"
+          >
+            <span>Yes, I forgive you ❤️</span>
+          </button>
+
+          <!-- PLAYFUL MOVING NO / THINKING BUTTON -->
+          <button 
+            id="thinkingBtn" 
+            onmouseover="dodgeButton()" 
+            onclick="handleThinkingClick()"
+            class="px-6 py-3.5 rounded-full bg-white text-gray-600 border border-rose-200 font-medium text-sm shadow hover:bg-rose-50 transition-all select-none z-10"
+          >
+            <span id="thinkingBtnLabel">Still thinking 🤔</span>
+          </button>
+        </div>
+
+        <!-- Sweet Response Message Box -->
+        <div id="forgiveSuccessBox" class="hidden mt-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-center animate-bounce">
+          <p class="text-2xl mb-1">🎉🥰🫂</p>
+          <h4 class="text-lg font-bold text-rose-600">Thank you for forgiving me, my angel!</h4>
+          <p class="text-xs sm:text-sm text-gray-600 mt-1">
+            I promise to always keep you smiling and never let tears touch your eyes. I love you endlessly!
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <script>
+    // State variables
+    let uploadedImageDataUrl = "";
+    let girlfriendName = "";
+    let audioContext = null;
+    let isPlayingMusic = false;
+    let musicInterval = null;
+    let startTime = Date.now() - (1000 * 60 * 60 * 14 + 1000 * 60 * 22); // Default counter starting point
+
+    /* Floating Heart Spawner */
+    function createFloatingHearts() {
+      const container = document.getElementById('heartCanvasContainer');
+      const emojis = ['❤️', '💖', '🌸', '✨', '💕', '🥰', '🌹'];
+      setInterval(() => {
+        const heart = document.createElement('div');
+        heart.className = 'heart-bg';
+        heart.style.left = Math.random() * 100 + 'vw';
+        heart.style.animationDuration = (5 + Math.random() * 5) + 's';
+        heart.style.fontSize = (16 + Math.random() * 24) + 'px';
+        heart.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        container.appendChild(heart);
+
+        setTimeout(() => {
+          heart.remove();
+        }, 9000);
+      }, 450);
+    }
+
+    // Photo input preview handler
+    function handlePhotoUpload(event) {
+      const file = event.target.files[0];
+      const errorBox = document.getElementById('formErrorMsg');
+      errorBox.classList.add('hidden');
+
+      if (file) {
+        if (!file.type.startsWith('image/')) {
+          showError("Please select a valid image file!");
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          uploadedImageDataUrl = e.target.result;
+          document.getElementById('imagePreview').src = uploadedImageDataUrl;
+          document.getElementById('uploadPreviewArea').classList.add('hidden');
+          document.getElementById('previewContainer').classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // Form Validator & Stage Transition
+    function validateAndProceed() {
+      const nameInput = document.getElementById('gfNameInput').value.trim();
+      const errorBox = document.getElementById('formErrorMsg');
+
+      if (!nameInput) {
+        showError("Please enter your lovely name first ❤️");
+        return;
+      }
+
+      if (!uploadedImageDataUrl) {
+        showError("Please upload a cute photo of you! It's mandatory for this secret card ✨");
+        return;
+      }
+
+      girlfriendName = nameInput;
+
+      // Populate Stage 2 fields
+      document.getElementById('displayHerNameHeader').textContent = girlfriendName;
+      document.getElementById('letterNamePlaceholder').textContent = girlfriendName;
+      document.getElementById('polaroidCaption').textContent = girlfriendName + " 💖";
+      document.getElementById('polaroidPhoto').src = uploadedImageDataUrl;
+
+      // Transition smoothly
+      const stage1 = document.getElementById('stage1');
+      const stage2 = document.getElementById('stage2');
+
+      stage1.classList.add('scale-95', 'opacity-0');
+      setTimeout(() => {
+        stage1.classList.add('hidden');
+        stage2.classList.remove('hidden');
+        stage2.classList.add('animate-fadeIn');
+        
+        // Start romantic ambient synth chime automatically upon unlocking
+        startSweetChimes();
+
+        // Burst celebratory mini confetti
+        confetti({
+          particleCount: 50,
+          spread: 60,
+          origin: { y: 0.6 }
+        });
+      }, 500);
+    }
+
+    function showError(msg) {
+      const errorBox = document.getElementById('formErrorMsg');
+      errorBox.textContent = msg;
+      errorBox.classList.remove('hidden');
+    }
+
+    function updateMissingTimer() {
+      const diff = Math.abs(Date.now() - startTime);
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+      const millis = Math.floor(diff % 1000);
+
+      document.getElementById('tickerDays').textContent = String(days).padStart(2, '0');
+      document.getElementById('tickerHours').textContent = String(hours).padStart(2, '0');
+      document.getElementById('tickerMins').textContent = String(minutes).padStart(2, '0');
+      document.getElementById('tickerSecs').textContent = String(seconds).padStart(2, '0');
+      document.getElementById('tickerMillis').textContent = String(millis).padStart(3, '0');
+
+      requestAnimationFrame(updateMissingTimer);
+    }
+
+    const poutyQuotes = [
+      "Still thinking 🤔",
+      "Are you sure? 🥺",
+      "Ek baar maaf kar do na! 😭",
+      "I promise chocolates! 🍫",
+      "Please baby! ❤️",
+      "Can't click this! 😜",
+      "Dil se sorry bol raha hoon... 🥺"
+    ];
+    let quoteIndex = 0;
+
+    function dodgeButton() {
+      const btn = document.getElementById('thinkingBtn');
+      const arena = document.getElementById('buttonActionArena');
+      
+      const maxX = (arena.clientWidth / 2) - 60;
+      const maxY = 50;
+
+      const randomX = (Math.random() - 0.5) * maxX * 1.5;
+      const randomY = (Math.random() - 0.5) * maxY * 1.5;
+
+      btn.style.transform = `translate(${randomX}px, ${randomY}px)`;
+      
+      quoteIndex = (quoteIndex + 1) % poutyQuotes.length;
+      document.getElementById('thinkingBtnLabel').textContent = poutyQuotes[quoteIndex];
+    }
+
+    function handleThinkingClick() {
+      dodgeButton();
+    }
+
+    function handleForgive() {
+      const successBox = document.getElementById('forgiveSuccessBox');
+      successBox.classList.remove('hidden');
+
+      // Hide or disable the buttons gently
+      document.getElementById('thinkingBtn').style.display = 'none';
+      document.getElementById('forgiveBtn').classList.add('scale-110');
+      document.getElementById('forgiveBtn').disabled = true;
+
+      // Big Confetti blast celebration
+      const duration = 4 * 1000;
+      const end = Date.now() + duration;
+
+      (function frame() {
+        confetti({
+          particleCount: 5,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 },
+          colors: ['#ff4d6d', '#ff758f', '#ff8fa3', '#c9184a', '#ffccd5']
+        });
+        confetti({
+          particleCount: 5,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 },
+          colors: ['#ff4d6d', '#ff758f', '#ff8fa3', '#c9184a', '#ffccd5']
+        });
+
+        if (Date.now() < end) {
+          requestAnimationFrame(frame);
+        }
+      }());
+    }
+
+    function playNote(freq, start, duration) {
+      if (!audioContext) return;
+      try {
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, start);
+
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(0.18, start + 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+
+        osc.start(start);
+        osc.stop(start + duration);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // Gentle arpeggio lullaby sequence
+    function playMelodyLoop() {
+      if (!audioContext || !isPlayingMusic) return;
+      const now = audioContext.currentTime;
+      // Notes: C4, E4, G4, B4, C5, G4, E4, A4
+      const notes = [261.63, 329.63, 392.00, 493.88, 523.25, 392.00, 329.63, 440.00];
+      const noteDuration = 0.55;
+
+      notes.forEach((freq, idx) => {
+        playNote(freq, now + (idx * noteDuration), 0.7);
+      });
+    }
+
+    function startSweetChimes() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+
+      isPlayingMusic = true;
+      document.getElementById('musicIcon').textContent = '🔊';
+      document.getElementById('musicStatusText').textContent = 'Melody Playing';
+
+      playMelodyLoop();
+      if (!musicInterval) {
+        musicInterval = setInterval(() => {
+          if (isPlayingMusic) playMelodyLoop();
+        }, 4400);
+      }
+    }
+
+    function toggleMusic() {
+      if (!isPlayingMusic) {
+        startSweetChimes();
+      } else {
+        isPlayingMusic = false;
+        document.getElementById('musicIcon').textContent = '🔈';
+        document.getElementById('musicStatusText').textContent = 'Melody Paused';
+        if (audioContext && audioContext.state === 'running') {
+          audioContext.suspend();
+        }
+      }
+    }
+
+    document.getElementById('musicToggleBtn').addEventListener('click', toggleMusic);
+
+    // Initializer
+    window.onload = function() {
+      createFloatingHearts();
+      requestAnimationFrame(updateMissingTimer);
+    };
+  </script>
+</body>
+</html>
